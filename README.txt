@@ -1,12 +1,17 @@
 Open two terminals and follow the steps on the terminals to start the servers:
 
+Kafka server
+	1. cd kafka-back-end
+	2. npm install
+	3. npm start
+
 Back-end server
-	1. cd node1
+	1. cd back-end
 	2. npm install
 	3. npm start
 
 Front-end server
-	1. cd react1
+	1. cd front-end
 	2. npm install
 	3. npm start
 
