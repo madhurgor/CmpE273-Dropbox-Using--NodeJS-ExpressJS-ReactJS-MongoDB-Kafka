@@ -1,0 +1,18 @@
+.c-card--error {
+    display: none;
+    background-color: #ffe3e3;
+    border: 1px solid #fcbdbd;
+    color: #921515;
+    margin-bottom: 3%;
+}
+
+.alert1 {
+    margin-top: 3%;
+}
+
+.link {
+  color: blue;
+	text-decoration: none;
+	padding-bottom: 0px;
+	border-bottom: 1px solid blue;
+}

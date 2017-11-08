@@ -1,0 +1,169 @@
+.d1 {
+    background:#F1F1F1;
+    height: 662px;
+}
+
+.img1 {
+  margin: 10%;
+}
+
+.l1 {
+    margin-left: 10%;
+    font-size: 16px;
+    line-height: 16px;
+    color: #637282;
+    display: block;
+    -ms-flex: 1;
+    text-decoration: none;
+}
+
+.l2 {
+    margin-left: 10%;
+    font-size: 16px;
+    line-height: 16px;
+    color: #637282;
+    display: block;
+    -ms-flex: 1;
+    text-decoration: none;
+}
+
+.starred {
+    padding: 16px;
+    background-color: #F7F9FA;
+    border-radius: 4px;
+    border: 1px solid #E6E8EB;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+}
+
+.upload-button {
+    line-height: 32px;
+    padding: 0 16px;
+    font-weight: 500;
+    border: none;
+    color: #FFF;
+    background-color: #0070E0;
+}
+
+.shared-folder-button {
+    margin-left: 5%;
+    line-height: 32px;
+    padding: 0 16px;
+    font-weight: 500;
+    border: none;
+    color: #FFF;
+    background-color: #0070E0;
+}
+
+.create-shared-folder-button {
+    line-height: 32px;
+    padding: 0 16px;
+    font-weight: 500;
+    border: none;
+    color: #FFF;
+    background-color: #0070E0;
+}
+
+.close-shared-folder-button {
+    line-height: 32px;
+    padding: 0 16px;
+    font-weight: 500;
+    border: none;
+    color: #FFF;
+    background-color: #0070E0;
+}
+
+.close-shared-folder-button .create-shared-folder-button{
+    display:inline-block;
+}
+
+.folder-button {
+    margin-left: 5%;
+    line-height: 32px;
+    padding: 0 16px;
+    font-weight: 500;
+    border: none;
+    color: #FFF;
+    background-color: #0070E0;
+}
+
+.folder-name-text {
+   margin-left: 5%;
+}
+
+.upload-submit {
+    margin-left: 5%;
+    line-height: 32px;
+    padding: 0 16px;
+    font-weight: 500;
+    border: none;
+    color: #FFF;
+    background-color: #0070E0;
+}
+
+.update-info {
+    margin-left: 30%;
+    line-height: 32px;
+    padding: 0 16px;
+    font-weight: 500;
+    border: none;
+    color: #FFF;
+    background-color: #0070E0;
+}
+
+.cancel-update-info {
+    margin-left: 3%;
+    line-height: 32px;
+    padding: 0 16px;
+    font-weight: 500;
+    border: none;
+    color: #FFF;
+    background-color: #0070E0;
+}
+
+.update-info .cancel-update-info{
+  display:inline-block;
+}
+
+.files-dropzone-list {
+  height: 30px;
+}
+
+.b1 {
+    line-height: 50px;
+    padding: 0 16px;
+    font-weight: 500;
+    border: none;
+    color: #FFF;
+    background-color: #0070E0;
+    float:right;
+}
+
+.button-back {
+    display:inline-block;
+    margin-left: 2%;
+    line-height: 50px;
+    padding: 0 16px;
+    font-weight: 500;
+    border: none;
+    color: #FFF;
+    background-color: #0070E0;
+}
+
+.header-folder{
+    display:inline-block;
+}
+
+.about1{
+  font-family: Calibri;
+  font-size: 20px;
+}
+
+.divide-files-array{
+  margin-bottom: 1%;
+}
+
+.btn{
+  margin-right: 2%;
+}
