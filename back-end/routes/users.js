@@ -542,84 +542,63 @@ router.post('/own_groups_files',function(req,res){
 });
 
 router.post('/shared_groups_files',function(req,res){
-  var g=[];
-
-  console.log(req.body.username);
-
-  MongoClient.connect(url1, function(err, db) {
-    if (err) throw err;
-    var query = { member: req.body.username };
-    db.collection("groups").find(query).toArray(function(err, results) {
-      if(err){
-         throw err;
-         res.status(401).json({message: "Some Error"});
-      } else {
-         console.log(results);
-         if(results.length > 0) {
-            var c=0;
-            results.forEach((item)=>{
-              c++;
-              g.push({creator:item.creator,folders:item.group});
-              if(c==results.length){
-                res.status(201).json({message: "Data",groupfolders:g});
-              }
-            });
-         } else {
-            console.log("No data");
-            res.status(401).json({message: "No data"});
-         }
-      }
-      db.close();
-    });
+  kafka.make_request('shared_groups_files_topic',{ username:req.body.username, }, function(err,results){
+    console.log('in result');
+    console.log(results);
+    if(err){
+      res.status(401).json({message: "Some Error"});
+    } else {
+      res.status(201).json({message: "Data",groupfolders:results.g});
+    }
   });
 });
 
 router.get('/open_ownshared_folder',function (req, res) {
-  var ownfiles=[];
-
-  fs.readdirSync(path.join(__dirname,'../../') + `${req.query.ownfolder} ${req.query.username}`).forEach(file => {
-    ownfiles.push(file);
-    console.log(file);
-  })
-
-  res.status(201).json({ownfiles:ownfiles});
+  kafka.make_request('open_ownshared_folder_topic',{ username:req.query.username, ownfolder:req.query.ownfolder }, function(err,results){
+    console.log('in result');
+    console.log(results);
+    if(err){
+      res.status(401).json({message: "Some Error"});
+    } else {
+      res.status(201).json({ownfiles:results.ownfiles});
+    }
+  });
 });
 
 router.get('/delete_own',function (req, res) {
-  rimraf(path.join(__dirname,'../../') + `${req.query.ownfolder} ${req.query.username}`, function () {
-    var logger = fs.createWriteStream(path.join(__dirname,'../../') + `/${req.query.username} ` +'log.txt', {
-      flags: 'a'
-    })
-    logger.write('\r\n Shared Folder "'+req.query.folder+'" by user "'+req.query.username+'" deleted on '+new Date(dt.now()));
-
-    MongoClient.connect(url1, function(err, db) {
-      if (err) throw err;
-      var myquery = { group: req.query.ownfolder, creator: req.query.username };
-      db.collection("groups").deleteOne(myquery, function(err, obj) {
-        if (err) {throw err;res.status(401).json();}
-        console.log("1 document deleted");
-        res.status(201).json();
-        db.close();
-      });
-    });
+  kafka.make_request('delete_own_topic',{ username:req.query.username, ownfolder:req.query.ownfolder }, function(err,results){
+    console.log('in result');
+    console.log(results);
+    if(err){
+      res.status(401).json({message: "Some Error"});
+    } else {
+      res.status(201).json({ownfiles:results.ownfiles});
+    }
   });
 });
 
 router.post('/files_fetch_own',urlencodedParser,function (req, res) {
-  var files=[];
-
-  console.log(req.body.folder);
-  console.log(req.body.username);
-
-  fs.readdirSync(path.join(__dirname,'../../') + `${req.body.folder} ${req.body.username}/`).forEach(file => {
-   files.push(file);
-   console.log(file);
-  })
-
-  res.status(201).json({files:files});
+  kafka.make_request('files_fetch_own_topic',{ username:req.body.username, folder:req.body.folder }, function(err,results){
+    console.log('in result');
+    console.log(results);
+    if(err){
+      res.status(401).json({message: "Some Error"});
+    } else {
+      res.status(201).json({files:results.files});
+    }
+  });
 });
 
 router.post('/files_fetch_shared',urlencodedParser,function (req, res) {
+  kafka.make_request('files_fetch_shared',{ username:req.body.username, folder:req.body.folder, creator:req.body.creator }, function(err,results){
+    console.log('in result');
+    console.log(results);
+    if(err){
+      res.status(401).json({message: "Some Error"});
+    } else {
+      res.status(201).json({files:results.files});
+    }
+  });
   var files=[];
 
   console.log(req.body.folder);

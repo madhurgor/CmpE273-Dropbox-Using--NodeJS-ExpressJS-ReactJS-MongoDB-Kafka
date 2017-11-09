@@ -1,4 +1,4 @@
-var mongoURL = "mongodb://localhost:27017/login";
+var url1 = "mongodb://localhost:27017/login";
 var MongoClient = require('mongodb').MongoClient;
 var bcrypt = require('bcrypt');
 var fs = require('fs');
@@ -12,7 +12,7 @@ function handle_request(msg, callback){
   var res = {};
   console.log("In handle request:"+ JSON.stringify(msg));
 
-  MongoClient.connect(mongoURL, function(err, db) {
+  MongoClient.connect(url1, function(err, db) {
     if (err) {done(e,{});}
     var query = { username: msg.username };
     db.collection("users").find(query).toArray(function(err, results) {

@@ -69,7 +69,7 @@ function handle_request(msg, callback){
                      var logger = fs.createWriteStream(path.join(__dirname,'../../') + `/${msg.username} ` +'log.txt', {
                        flags: 'a'
                      })
-                     logger.write('\r\n Created group '+`/${msg.grp_name}/`+foldername+' on '+new Date(dt.now()));
+                     logger.write('\r\n Created group '+`/${msg.grp_name}/`+' on '+new Date(dt.now()));
 
                      callback(null,res);
                      //res.status(201).json({message: "Data",member:m,notMember:nm});

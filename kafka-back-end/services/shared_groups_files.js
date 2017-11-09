@@ -10,13 +10,13 @@ function handle_request(msg, callback){
   var res = {};
   console.log("In handle request:"+ JSON.stringify(msg));
 
-  var o=[];
+  var g=[];
 
   console.log(msg.username);
 
   MongoClient.connect(url1, function(err, db) {
     if (err) throw err;
-    var query = { creator: msg.username };
+    var query = { member: msg.username };
     db.collection("groups").find(query).toArray(function(err, results) {
       if(err){
          throw err;
@@ -30,30 +30,25 @@ function handle_request(msg, callback){
             var c=0;
             results.forEach((item)=>{
               c++;
-              o.push(item.group);
-
-              o=o.filter(function(elem, pos) {
-                return o.indexOf(elem) == pos;
-              })
-
+              g.push({creator:item.creator,folders:item.group});
               if(c==results.length){
                 res.code=201;
                 res.message="Data";
-                res.o=o;
+                res.g=g;
 
                 var logger = fs.createWriteStream(path.join(__dirname,'../../') + `/${msg.username} ` +'log.txt', {
                   flags: 'a'
                 })
-                logger.write('\r\n Reading own created groups on '+new Date(dt.now()));
+                logger.write('\r\n Read files shared by others in group on '+new Date(dt.now()));
 
                 callback(null,res);
-                //res.status(201).json({message: "Data",ownfolders:o,});
+                //res.status(201).json({message: "Data",groupfolders:g});
               }
             });
          } else {
             console.log("No data");
             res.code=401;
-            res.message="No Data";
+            res.message="No data";
             callback(null,res);
             //res.status(401).json({message: "No data"});
          }
