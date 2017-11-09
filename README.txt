@@ -12,3 +12,11 @@ Front-end server
 
 -->upload folder needs to be created in Main Directory if it does not exist, without this folder application will not work..
 -->exported database is stored in "exported dropbox_sql" file
+
+
+topic_names:
+login_topic
+response_topic
+signup_topic
+files_topic
+filesF_topic

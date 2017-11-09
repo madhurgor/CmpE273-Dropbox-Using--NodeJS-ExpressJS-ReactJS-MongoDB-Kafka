@@ -261,123 +261,27 @@ router.post('/signup',urlencodedParser,function (req, res) {
 });
 
 router.post('/files', upload.any(), function (req, res, next) {
-   if (!req.files) {
-      return next(new Error('No files uploaded'))
-   }
-
-   var logger = fs.createWriteStream(path.join(__dirname,'../../') + `/${req.query.username} ` +'log.txt', {
-     flags: 'a'
-   })
-   logger.write('\r\n Uploading file/s on '+new Date(dt.now()));
-
-   req.files.forEach((file) => {
-      var n1=0;
-      while(true)
-      {
-        if(!fs.existsSync(path.join(__dirname,'../../') + `/${req.query.username}/normal/` + file.originalname))
-        {
-          fs.rename(path.join(__dirname,'../../') + '/uploads/' + file.filename, path.join(__dirname,'../../') + `/${req.query.username}/normal/` + file.originalname, function(err) {
-                if ( err ) console.log('ERROR: ' + err);
-            });
-
-            logger.write('\r\n  Uploaded file \"'+file.originalname+'\" on '+new Date(dt.now()));
-
-          //fs.unlinkSync(path.join(__dirname, file.path))
-          break;
-        }
-        else
-        {
-          if(n1==0)
-          {
-            n1+=1;
-            var ext,name,oname=file.originalname,n;
-            n=oname.lastIndexOf(".");
-            ext=oname.substring(n);
-            name=oname.substring(0,n);
-            file.originalname=name+' ('+n1+')'+ext;
-          }
-          else
-          {
-            var ext,name,oname=file.originalname,n;
-            n=oname.lastIndexOf(".");
-            n3=oname.lastIndexOf("(")
-            n2=oname.lastIndexOf(")")
-            newadd=Number(oname.substring(n3+1,n2))+1;
-            ext=oname.substring(n);
-            n3=oname.lastIndexOf('(');
-            name=oname.substring(0,n3+1);
-            file.originalname=name+newadd+')'+ext;
-          }
-        }
-      }
-   })
-
-   logger = fs.createWriteStream(path.join(__dirname,'../../') + `/${req.query.username} ` +'log.txt', {
-     flags: 'a'
-   })
-   logger.write('\r\n End Uploading file/s on '+new Date(dt.now()));
-
-   res.status(200).end()
+  kafka.make_request('files_topic',{ username:req.query.username, files:req.files }, function(err,results){
+    console.log('in result');
+    console.log(results);
+    if(err){
+      res.status(401).json({message: "Some Error"});
+    } else {
+      res.status(200).end();
+    }
+  });
 })
 
 router.post('/filesF', upload.any(), function (req, res, next) {
-   if (!req.files) {
-      return next(new Error('No files uploaded'))
-   }
-
-   var logger = fs.createWriteStream(path.join(__dirname,'../../') + `/${req.query.username} ` +'log.txt', {
-     flags: 'a'
-   })
-   logger.write('\r\n Uploading file/s in folder '+req.query.path+' on '+new Date(dt.now()));
-
-   req.files.forEach((file) => {
-      var n1=0;
-      while(true)
-      {
-        if(!fs.existsSync(path.join(__dirname,'../../') + `/${req.query.username}/normal/${req.query.path}/` + file.originalname))
-        {
-          fs.rename(path.join(__dirname,'../../') + '/uploads/' + file.filename, path.join(__dirname,'../../') + `/${req.query.username}/normal/${req.query.path}/` + file.originalname, function(err) {
-                if ( err ) console.log('ERROR: ' + err);
-            });
-
-            logger.write('\r\n  Uploaded file \"'+file.originalname+'\" in folder '+req.query.path+' on '+new Date(dt.now()));
-
-          //fs.unlinkSync(path.join(__dirname, file.path))
-          break;
-        }
-        else
-        {
-          if(n1==0)
-          {
-            n1+=1;
-            var ext,name,oname=file.originalname,n;
-            n=oname.lastIndexOf(".");
-            ext=oname.substring(n);
-            name=oname.substring(0,n);
-            file.originalname=name+' ('+n1+')'+ext;
-          }
-          else
-          {
-            var ext,name,oname=file.originalname,n;
-            n=oname.lastIndexOf(".");
-            n3=oname.lastIndexOf("(")
-            n2=oname.lastIndexOf(")")
-            newadd=Number(oname.substring(n3+1,n2))+1;
-            ext=oname.substring(n);
-            n3=oname.lastIndexOf('(');
-            name=oname.substring(0,n3+1);
-            file.originalname=name+newadd+')'+ext;
-          }
-        }
-      }
-   })
-
-   logger = fs.createWriteStream(path.join(__dirname,'../../') + `/${req.query.username} ` +'log.txt', {
-     flags: 'a'
-   })
-   logger.write('\r\n End Uploading file/s in folder '+req.query.path+' on '+new Date(dt.now()));
-
-   res.status(200).end()
+  kafka.make_request('filesF_topic',{ username:req.query.username, files:req.files, path:req.query.path }, function(err,results){
+    console.log('in result');
+    console.log(results);
+    if(err){
+      res.status(401).json({message: "Some Error"});
+    } else {
+      res.status(200).end();
+    }
+  });
 })
 
 router.post('/about',urlencodedParser,function (req, res) {
@@ -439,57 +343,39 @@ router.post('/about_change',urlencodedParser,function(req, res) {
 });
 
 router.post('/files_fetch',urlencodedParser,function (req, res) {
-  var files=[],folders=[];
-
-  var logger = fs.createWriteStream(path.join(__dirname,'../../') + `/${req.body.username} ` +'log.txt', {
-    flags: 'a'
-  })
-  logger.write('\r\n Fetching file name/s on '+new Date(dt.now()));
-
-  fs.readdirSync(path.join(__dirname,'../../') + `${req.body.username}/normal/${req.body.path}/`).forEach(file => {
-    if(fs.lstatSync(path.join(__dirname,'../../') + `${req.body.username}/normal/${req.body.path}/${file}`).isDirectory())
-      folders.push(file);
-    else
-      files.push(file);
-
-   logger.write('\r\n  Fetched file name \"'+file+'\" on '+new Date(dt.now()));
-
-  })
-
-  logger.write('\r\n End fetching file name/s on '+new Date(dt.now()));
-
-  res.status(201).json({files:files,folders:folders});
+  kafka.make_request('files_fetch_topic',{ username:req.body.username, path:req.body.path }, function(err,results){
+    console.log('in result');
+    console.log(results);
+    if(err){
+      res.status(401).json({message: "Some Error"});
+    } else {
+      res.status(201).json({files:results.files,folders:results.folders});
+    }
+  });
 });
 
 router.get('/open_folder',function (req, res) {
-  var files=[],folders=[];
-
-  var logger = fs.createWriteStream(path.join(__dirname,'../../') + `/${req.query.username} ` +'log.txt', {
-    flags: 'a'
-  })
-  logger.write('\r\n Fetching file name/s from folder '+req.query.path+' on '+new Date(dt.now()));
-
-  console.log(path.join(__dirname,'../../') + `${req.query.username}/normal/${req.query.path}/`);
-
-  fs.readdirSync(path.join(__dirname,'../../') + `${req.query.username}/normal/${req.query.path}/`).forEach(file => {
-    if(fs.lstatSync(path.join(__dirname,'../../') + `${req.query.username}/normal/${req.query.path}/${file}`).isDirectory())
-      folders.push(file);
-    else
-      files.push(file);
-
-      console.log(file);
-
-   logger.write('\r\n  Fetched file name \"'+file+'\" on '+new Date(dt.now()));
-
-  })
-
-  logger.write('\r\n End fetching file name/s from folder '+req.query.path+' on '+new Date(dt.now()));
-
-  res.status(201).json({files:files,folders:folders});
+  kafka.make_request('open_folder_topic',{ username:req.query.username, path:req.query.path }, function(err,results){
+    console.log('in result');
+    console.log(results);
+    if(err){
+      res.status(401).json({message: "Some Error"});
+    } else {
+      res.status(201).json({files:results.files,folders:results.folders});
+    }
+  });
 });
 
 router.get('/delete_folder',function (req, res) {
-
+  kafka.make_request('delete_folder_topic',{ username:req.query.username, path:req.query.path }, function(err,results){
+    console.log('in result');
+    console.log(results);
+    if(err){
+      res.status(401).json({message: "Some Error"});
+    } else {
+      res.status(201).json({files:results.files,folders:results.folders});
+    }
+  });
   rimraf(path.join(__dirname,'../../') + `${req.query.username}/normal/${req.query.path}/${req.query.folder}`, function () {
     var logger = fs.createWriteStream(path.join(__dirname,'../../') + `/${req.query.username} ` +'log.txt', {
       flags: 'a'
@@ -497,27 +383,18 @@ router.get('/delete_folder',function (req, res) {
     logger.write('\r\n Folder "'+req.query.folder+'" deleted from '+req.query.path+' on '+new Date(dt.now()));
     res.status(201).json();
   });
-
 });
 
 router.post('/files_fetchR',urlencodedParser,function (req, res) {
-  var files=[];
-
-  var logger = fs.createWriteStream(path.join(__dirname,'../../') + `/${req.body.username} ` +'log.txt', {
-    flags: 'a'
-  })
-  logger.write('\r\n Fetching starred file name/s on '+new Date(dt.now()));
-
-  fs.readdirSync(path.join(__dirname,'../../') + `${req.body.username}/star/`).forEach(file => {
-    files.push(file);
-
-   logger.write('\r\n  Fetched starred file name \"'+file+'\" on '+new Date(dt.now()));
-
-  })
-
-  logger.write('\r\n End fetching starred file name/s on '+new Date(dt.now()));
-
-  res.status(201).json({files:files});
+  kafka.make_request('files_fetchR_topic',{ username:req.body.username, path:req.body.path }, function(err,results){
+    console.log('in result');
+    console.log(results);
+    if(err){
+      res.status(401).json({message: "Some Error"});
+    } else {
+      res.status(201).json({files:results.files});
+    }
+  });
 });
 
 router.get('/download',function(req, res){
