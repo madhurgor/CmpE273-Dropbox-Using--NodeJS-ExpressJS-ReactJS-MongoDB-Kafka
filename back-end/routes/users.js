@@ -367,7 +367,7 @@ router.get('/open_folder',function (req, res) {
 });
 
 router.get('/delete_folder',function (req, res) {
-  kafka.make_request('delete_folder_topic',{ username:req.query.username, path:req.query.path }, function(err,results){
+  kafka.make_request('delete_folder_topic',{ username:req.query.username, path:req.query.path, folder:req.query.folder }, function(err,results){
     console.log('in result');
     console.log(results);
     if(err){
@@ -375,13 +375,6 @@ router.get('/delete_folder',function (req, res) {
     } else {
       res.status(201).json({files:results.files,folders:results.folders});
     }
-  });
-  rimraf(path.join(__dirname,'../../') + `${req.query.username}/normal/${req.query.path}/${req.query.folder}`, function () {
-    var logger = fs.createWriteStream(path.join(__dirname,'../../') + `/${req.query.username} ` +'log.txt', {
-      flags: 'a'
-    })
-    logger.write('\r\n Folder "'+req.query.folder+'" deleted from '+req.query.path+' on '+new Date(dt.now()));
-    res.status(201).json();
   });
 });
 
@@ -398,59 +391,52 @@ router.post('/files_fetchR',urlencodedParser,function (req, res) {
 });
 
 router.get('/download',function(req, res){
-
-   var logger = fs.createWriteStream(path.join(__dirname,'../../') + `/${req.query.username} ` +'log.txt', {
-     flags: 'a'
-   })
-   logger.write('\r\n Downloaded file \"'+req.query.file+'\" from folder '+req.query.path+' on '+new Date(dt.now()));
-
-  //res.download(path.join(__dirname,'../../')+`/${req.query.username}/normal/${req.query.path}/`+`/${req.query.file}`);
-  fs.readFile(path.join(__dirname,'../../')+`/${req.query.username}/normal/${req.query.path}/`+`/${req.query.file}`, 'utf8', function(err, data) {
-      if (err) res.status(401).json();;
-      res.status(200).json({data:data});
+  kafka.make_request('download_topic',{ username:req.query.username, path:req.query.path, file:req.query.file }, function(err,results){
+    console.log('in result');
+    console.log(results);
+    if(err){
+      res.status(401).json({message: "Some Error"});
+    } else {
+      res.status(201).json({data:results.data});
+    }
   });
   //res.status(200).json();
 });
 
 router.get('/delete',function(req, res){
-
-  fs.unlinkSync(path.join(__dirname,'../../')+`/${req.query.username}/normal/${req.query.path}/`+`/${req.query.file}`);
-
-  var logger = fs.createWriteStream(path.join(__dirname,'../../') + `/${req.query.username} ` +'log.txt', {
-    flags: 'a'
-  })
-  logger.write('\r\n Deleted file \"'+req.query.file+'\" from folder '+req.query.path+' on '+new Date(dt.now()));
-
-  try{
-    fs.unlinkSync(path.join(__dirname,'../../')+`/${req.query.username}/star/`+`/${req.query.file}`);
-  }catch(err){
-    console.log("Deleting a un-starred file");
-    //console.log(err);
-  }
-
-  res.status(200).json();
+  kafka.make_request('delete_topic',{ username:req.query.username, path:req.query.path, file:req.query.file }, function(err,results){
+    console.log('in result');
+    console.log(results);
+    if(err){
+      res.status(401).json({message: "Some Error"});
+    } else {
+      res.status(201).json();
+    }
+  });
 });
 
 router.get('/star',function(req, res){
-
-   var logger = fs.createWriteStream(path.join(__dirname,'../../') + `/${req.query.username} ` +'log.txt', {
-     flags: 'a'
-   })
-   logger.write('\r\n Starred file \"'+req.query.file+'\" of folder '+req.query.path+' on '+new Date(dt.now()));
-
-  fs.writeFileSync(path.join(__dirname,'../../')+`/${req.query.username}/star/${req.query.file}`, fs.readFileSync(path.join(__dirname,'../../')+`/${req.query.username}/normal/${req.query.path}/`+`/${req.query.file}`));
-  res.status(200).json();
+  kafka.make_request('star_topic',{ username:req.query.username, path:req.query.path, file:req.query.file }, function(err,results){
+    console.log('in result');
+    console.log(results);
+    if(err){
+      res.status(401).json({message: "Some Error"});
+    } else {
+      res.status(200).json();
+    }
+  });
 });
 
 router.get('/unstar',function(req, res){
-
-   var logger = fs.createWriteStream(path.join(__dirname,'../../') + `/${req.query.username} ` +'log.txt', {
-     flags: 'a'
-   })
-   logger.write('\r\n Unstarred file \"'+req.query.file+'\" on '+new Date(dt.now()));
-
-  fs.unlinkSync(path.join(__dirname,'../../')+`/${req.query.username}/star/`+`/${req.query.file}`);
-  res.status(200).json();
+  kafka.make_request('unstar_topic',{ username:req.query.username, path:req.query.path, file:req.query.file }, function(err,results){
+    console.log('in result');
+    console.log(results);
+    if(err){
+      res.status(401).json({message: "Some Error"});
+    } else {
+      res.status(200).json();
+    }
+  });
 });
 
 /*router.get('/logout',function(req, res){
@@ -475,63 +461,34 @@ router.get('/unstar',function(req, res){
 });*/
 
 router.post('/logout',function(req, res){
+  kafka.make_request('logout_topic',{ username:req.body.username }, function(err,results){
+    console.log('in result');
+    console.log(results);
+    if(err){
+      res.status(401).json({message: "Some Error"});
+    } else {
+      res.status(200).json();
+    }
+  });
 
   console.log(req.session.user);
   req.session.destroy();
   console.log('Session Destroyed');
-
-  console.log(req.body.username);
-
-  var logger = fs.createWriteStream(path.join(__dirname,'../../') + `/${req.body.username} ` +'log.txt', {
-    flags: 'a'
-  })
-  logger.write('\r\nSigned out on '+new Date(dt.now()));
-
-  logger = fs.createWriteStream(path.join(__dirname,'../../') +'log.txt', {
-    flags: 'a'
-  })
-  logger.write(`\r\n${req.body.username} signed out on `+new Date(dt.now()));
-
-  res.status(200).json();
 });
 
 router.get('/createfolder',function(req, res){
-
-  var foldername=req.query.foldername,n1=0;
-  var actualName=foldername;
-
-  while(true)
-  {
-    if(!fs.existsSync(path.join(__dirname,'../../') + `/${req.query.username}/normal/${req.query.path}/` + foldername))
-    {
-      mkdirSync('../'+req.query.username+'/normal/'+`/${req.query.path}/`+foldername);
-
-      var logger = fs.createWriteStream(path.join(__dirname,'../../') + `/${req.query.username} ` +'log.txt', {
-        flags: 'a'
-      })
-      logger.write('\r\n Created folder '+`/${req.query.path}/`+foldername+' on '+new Date(dt.now()));
-
-      break;
+  kafka.make_request('createfolder_topic',{ username:req.query.username, foldername:req.query.foldername, path:req.query.path }, function(err,results){
+    console.log('in result');
+    console.log(results);
+    if(err){
+      res.status(401).json({message: "Some Error"});
+    } else {
+      res.status(200).json();
     }
-    else
-    {
-      if(n1==0)
-      {
-        n1+=1;
-        foldername=foldername+' ('+n1+')';
-      }
-      else
-      {
-        n1+=1;
-        foldername=actualName+' ('+n1+')';
-      }
-    }
-  }
-
-  res.status(200).json();
+  });
 });
 
-router.get('/open_folder',function (req, res) {
+/*router.get('/open_folder',function (req, res) {
   var files=[],folders=[];
 
   var logger = fs.createWriteStream(path.join(__dirname,'../../') + `/${req.query.username} ` +'log.txt', {
@@ -556,98 +513,31 @@ router.get('/open_folder',function (req, res) {
   logger.write('\r\n End fetching file name/s from folder '+req.query.path+' on '+new Date(dt.now()));
 
   res.status(201).json({files:files,folders:folders});
-});
+});*/
 
 router.get('/group_create',function(req, res){
-  var group=req.query.group.filter((item)=>{return item!==''});
-  var group=group.filter(function(elem, pos) {
-      return group.indexOf(elem) == pos;
-  })
-  console.log(group);
-
-  var i=0,m=[],nm=[],myObj=[];
-
-  group.forEach(function(item){
-    MongoClient.connect(url1, function(err, db) {
-      if (err) throw err;
-      var query = { username: item };
-      db.collection("users").find(query).toArray(function(err, results) {
-        if(err){
-           throw err;
-           res.status(401).json({message: "Some Error"});
-        } else {
-           myObj.push({group:req.query.grp_name,creator:req.query.username,member:item});
-           console.log(results);
-           if(results.length > 0) {
-              i++;
-              m.push(item);
-           } else {
-              i++;
-              nm.push(item);
-           }
-           if(i===group.length){
-             if(err){
-               throw err;
-               res.status(401).json({message: "Some Error"});
-             }else if(fs.existsSync(path.join(__dirname,'../../') + `/${req.query.grp_name} ${req.query.username}`)) {
-               res.status(202).json({message: "Group already exists!!"});
-             }else{
-               if(nm.length===0){mkdirSync('../'+req.query.grp_name+' '+req.query.username);
-                 db.collection("groups").insertMany(myObj, function(err, response) {
-                   if(err){
-                     throw err;
-                     res.status(401).json({message: "Some Error"});
-                   }else{
-                     res.status(201).json({message: "Data",member:m,notMember:nm});
-                   }
-                 });
-               }else{
-                 res.status(201).json({message: "Data",member:m,notMember:nm});
-               }
-             }
-           }
-        }
-        db.close();
-      });
-    });
+  kafka.make_request('group_create_topic',{ username:req.query.username, group:req.query.group, grp_name:req.query.grp_name,  }, function(err,results){
+    console.log('in result');
+    console.log(results);
+    if(err){
+      res.status(401).json({message: "Some Error"});
+    } else if(results.code===202) {
+      res.status(202).json({message: "Group already exists!!"});
+    } else {
+      res.status(201).json({message: "Data",member:results.m,notMember:results.nm});
+    }
   });
 });
 
 router.post('/own_groups_files',function(req,res){
-  var o=[];
-
-  console.log(req.body.username);
-
-  MongoClient.connect(url1, function(err, db) {
-    if (err) throw err;
-    var query = { creator: req.body.username };
-    db.collection("groups").find(query).toArray(function(err, results) {
-      if(err){
-         throw err;
-         res.status(401).json({message: "Some Error"});
-      } else {
-         console.log(results);
-         if(results.length > 0) {
-            var c=0;
-            results.forEach((item)=>{
-              c++;
-              o.push(item.group);
-
-              o=o.filter(function(elem, pos) {
-                return o.indexOf(elem) == pos;
-              })
-
-              if(c==results.length){
-                res.status(201).json({message: "Data",ownfolders:o,});
-              }
-            });
-         } else {
-            console.log("No data");
-            res.status(401).json({message: "No data"});
-         }
-      }
-      db.close();
-    });
+  kafka.make_request('own_groups_files_topic',{ username:req.body.username, }, function(err,results){
+    console.log('in result');
+    console.log(results);
+    if(err){
+      res.status(401).json({message: "Some Error"});
+    } else {
+      res.status(201).json({message: "Data",ownfolders:results.o,});
+    }
   });
 });
 
