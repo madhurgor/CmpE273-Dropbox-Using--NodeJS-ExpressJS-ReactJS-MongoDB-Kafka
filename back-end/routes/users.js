@@ -590,7 +590,7 @@ router.post('/files_fetch_own',urlencodedParser,function (req, res) {
 });
 
 router.post('/files_fetch_shared',urlencodedParser,function (req, res) {
-  kafka.make_request('files_fetch_shared',{ username:req.body.username, folder:req.body.folder, creator:req.body.creator }, function(err,results){
+  kafka.make_request('files_fetch_shared_topic',{ username:req.body.username, folder:req.body.folder, creator:req.body.creator }, function(err,results){
     console.log('in result');
     console.log(results);
     if(err){
@@ -599,437 +599,102 @@ router.post('/files_fetch_shared',urlencodedParser,function (req, res) {
       res.status(201).json({files:results.files});
     }
   });
-  var files=[];
-
-  console.log(req.body.folder);
-  console.log(req.body.username);
-
-  fs.readdirSync(path.join(__dirname,'../../') + `${req.body.folder} ${req.body.creator}/`).forEach(file => {
-   files.push(file);
-   console.log(file);
-  })
-
-  res.status(201).json({files:files});
 });
 
 router.post('/filesO', upload.any(), function (req, res, next) {
-   if (!req.files) {
-      return next(new Error('No files uploaded'))
-   }
-
-   req.files.forEach((file) => {
-      var n1=0;
-      while(true)
-      {
-        if(!fs.existsSync(path.join(__dirname,'../../') + `/${req.query.folder} ${req.query.username}/` + file.originalname))
-        {
-          fs.rename(path.join(__dirname,'../../') + '/uploads/' + file.filename, path.join(__dirname,'../../') + `/${req.query.folder} ${req.query.username}/` + file.originalname, function(err) {
-                if ( err ) console.log('ERROR: ' + err);
-            });
-
-          //fs.unlinkSync(path.join(__dirname, file.path))
-          break;
-        }
-        else
-        {
-          if(n1==0)
-          {
-            n1+=1;
-            var ext,name,oname=file.originalname,n;
-            n=oname.lastIndexOf(".");
-            ext=oname.substring(n);
-            name=oname.substring(0,n);
-            file.originalname=name+' ('+n1+')'+ext;
-          }
-          else
-          {
-            var ext,name,oname=file.originalname,n;
-            n=oname.lastIndexOf(".");
-            n3=oname.lastIndexOf("(")
-            n2=oname.lastIndexOf(")")
-            newadd=Number(oname.substring(n3+1,n2))+1;
-            ext=oname.substring(n);
-            n3=oname.lastIndexOf('(');
-            name=oname.substring(0,n3+1);
-            file.originalname=name+newadd+')'+ext;
-          }
-        }
-      }
-   })
-
-   res.status(200).end()
+  kafka.make_request('filesO_topic',{ username:req.query.username, folder:req.query.folder, files:req.files, }, function(err,results){
+    console.log('in result');
+    console.log(results);
+    if(err){
+      res.status(401).json({message: "Some Error"});
+    } else {
+      res.status(200).end()
+    }
+  });
 });
 
 router.get('/downloadG',function(req, res){
-  //res.download(path.join(__dirname,'../../')+`/${req.query.folder} ${req.query.username}/`+`/${req.query.file}`);
-  fs.readFile(path.join(__dirname,'../../')+`/${req.query.folder} ${req.query.username}/`+`/${req.query.file}`, 'utf8', function(err, data) {
-      if (err) res.status(401).json();
-      res.status(200).json({data:data});
+  kafka.make_request('downloadG_topic',{ username:req.query.username, folder:req.query.folder, file:req.query.file, }, function(err,results){
+    console.log('in result');
+    console.log(results);
+    if(err){
+      res.status(401).json({message: "Some Error"});
+    } else {
+      res.status(200).json({data:results.data});
+    }
   });
 });
 
 router.get('/downloadR',function(req, res){
-  //console.log(path.join(__dirname,'../../')+`/${req.query.username}/star`+`/${req.query.file}`);
-  fs.readFile(path.join(__dirname,'../../')+`/${req.query.username}/star/${req.query.file}`, 'utf8', function(err, data) {
-      if (err) res.status(401).json();
-      res.status(200).json({data:data});
+  kafka.make_request('downloadR_topic',{ username:req.query.username, file:req.query.file, }, function(err,results){
+    console.log('in result');
+    console.log(results);
+    if(err){
+      res.status(401).json({message: "Some Error"});
+    } else {
+      res.status(200).json({data:results.data});
+    }
   });
 });
 
 router.get('/deleteG',function(req, res){
-  fs.unlinkSync(path.join(__dirname,'../../')+`/${req.query.folder} ${req.query.username}/`+`/${req.query.file}`);
-  res.status(200).json();
+  kafka.make_request('deleteG_topic',{ username:req.query.username, folder:req.query.folder, file:req.query.file, }, function(err,results){
+    console.log('in result');
+    console.log(results);
+    if(err){
+      res.status(401).json({message: "Some Error"});
+    } else {
+      res.status(200).json();
+    }
+  });
 });
 
 router.get('/share',function(req, res){
-  var member=req.query.member.filter((item)=>{return item!==''});
-  var member=member.filter(function(elem, pos) {
-      return member.indexOf(elem) == pos;
-  })
-  nodemailer.createTestAccount((err, account) => {
-    // create reusable transporter object using the default SMTP transport
-    let transporter = nodemailer.createTransport({
-      /*host: 'smtp.sendgrid.net',
-      port: 587,
-      auth: {
-          user: 'real.user',
-          user: 'verysecret'
-      }
-      host: 'smtp.ethereal.email',
-      port: 587,
-      auth: {
-          user: 'ethereal.user@ethereal.email',
-          user: 'verysecret'
-      }*/
-      service: 'gmail',
-       auth: {
-              user: 'youremail@address.com@gmail.com',
-              pass: 'yourpassword'
-       }
-    });
-
-    // setup email data with unicode symbols
-    let mailOptions = {
-        from: '"👻" <foo@blurdybloop.com>', // sender address
-        to: member, // list of receivers
-        subject: 'no-reply@dropbox.com ✔', // Subject line
-        text: "'"+req.query.username+"' has shared file '"+req.query.file+"' with you. Please see attachment to view the file.", // plain text body
-        //html: '<b>Hello world?</b>', // html body
-        attachments: [
-            {
-                filename: req.query.file,
-                path: path.join(__dirname,'../../') + `/${req.query.username}/normal/${req.query.path}/${req.query.file}`,
-                cid: 'nyan@example.com' // should be as unique as possible
-            },
-            /*// String attachment
-            {
-                filename: 'notes.txt',
-                content: 'Some notes about this e-mail',
-                contentType: 'text/plain' // optional, would be detected from the filename
-            },
-
-            // Binary Buffer attachment
-            {
-                filename: 'image.png',
-                content: new Buffer(
-                    'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQAQMAAAAlPW0iAAAABlBMVEUAAAD/' +
-                        '//+l2Z/dAAAAM0lEQVR4nGP4/5/h/1+G/58ZDrAz3D/McH8yw83NDDeNGe4U' +
-                        'g9C9zwz3gVLMDA/A6P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC',
-                    'base64'
-                ),
-
-                cid: 'note@example.com' // should be as unique as possible
-            },
-
-            // File Stream attachment
-            {
-                filename: 'nyan cat ✔.gif',
-                path: __dirname + '/assets/nyan.gif',
-                cid: 'nyan@example.com' // should be as unique as possible
-            }*/
-        ]
-    };
-
-    // send mail with defined transport object
-    transporter.sendMail(mailOptions, (error, info) => {
-        if (error) {
-            return console.log(error);
-            res.status(401).json();
-        }
-        console.log('Message sent: %s', info.messageId);
-        // Preview only available when sending through an Ethereal account
-        console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
-
-        // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@blurdybloop.com>
-        // Preview URL: https://ethereal.email/message/WaQKMgKddxQDoou...
-
-        transporter.close();
-        res.status(200).json();
-    });
+  kafka.make_request('share_topic',{ username:req.query.username, path:req.query.path, file:req.query.file, member:req.query.member }, function(err,results){
+    console.log('in result');
+    console.log(results);
+    if(err){
+      res.status(401).json({message: "Some Error"});
+    } else {
+      res.status(200).json();
+    }
   });
 });
 
 router.get('/shareS',function(req, res){
-  var member=req.query.member.filter((item)=>{return item!==''});
-  var member=member.filter(function(elem, pos) {
-      return member.indexOf(elem) == pos;
-  })
-  nodemailer.createTestAccount((err, account) => {
-    // create reusable transporter object using the default SMTP transport
-    let transporter = nodemailer.createTransport({
-      /*host: 'smtp.sendgrid.net',
-      port: 587,
-      auth: {
-          user: 'real.user',
-          user: 'verysecret'
-      }
-      host: 'smtp.ethereal.email',
-      port: 587,
-      auth: {
-          user: 'ethereal.user@ethereal.email',
-          user: 'verysecret'
-      }*/
-      service: 'gmail',
-       auth: {
-              user: 'youremail@address.com@gmail.com',
-              pass: 'yourpassword'
-       }
-    });
-
-    // setup email data with unicode symbols
-    let mailOptions = {
-        from: '"👻" <foo@blurdybloop.com>', // sender address
-        to: member, // list of receivers
-        subject: 'no-reply@dropbox.com ✔', // Subject line
-        text: "'"+req.query.username+"' has shared file '"+req.query.file+"' with you. Please see attachment to view the file.", // plain text body
-        //html: '<b>Hello world?</b>', // html body
-        attachments: [
-            {
-                filename: req.query.file,
-                path: path.join(__dirname,'../../') + `/${req.query.username}/star/${req.query.file}`,
-                cid: 'nyan@example.com' // should be as unique as possible
-            },
-            /*// String attachment
-            {
-                filename: 'notes.txt',
-                content: 'Some notes about this e-mail',
-                contentType: 'text/plain' // optional, would be detected from the filename
-            },
-
-            // Binary Buffer attachment
-            {
-                filename: 'image.png',
-                content: new Buffer(
-                    'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQAQMAAAAlPW0iAAAABlBMVEUAAAD/' +
-                        '//+l2Z/dAAAAM0lEQVR4nGP4/5/h/1+G/58ZDrAz3D/McH8yw83NDDeNGe4U' +
-                        'g9C9zwz3gVLMDA/A6P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC',
-                    'base64'
-                ),
-
-                cid: 'note@example.com' // should be as unique as possible
-            },
-
-            // File Stream attachment
-            {
-                filename: 'nyan cat ✔.gif',
-                path: __dirname + '/assets/nyan.gif',
-                cid: 'nyan@example.com' // should be as unique as possible
-            }*/
-        ]
-    };
-
-    // send mail with defined transport object
-    transporter.sendMail(mailOptions, (error, info) => {
-        if (error) {
-            return console.log(error);
-            res.status(401).json();
-        }
-        console.log('Message sent: %s', info.messageId);
-        // Preview only available when sending through an Ethereal account
-        console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
-
-        // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@blurdybloop.com>
-        // Preview URL: https://ethereal.email/message/WaQKMgKddxQDoou...
-
-        transporter.close();
-        res.status(200).json();
-    });
+  kafka.make_request('shareS_topic',{ username:req.query.username, file:req.query.file, member:req.query.member }, function(err,results){
+    console.log('in result');
+    console.log(results);
+    if(err){
+      res.status(401).json({message: "Some Error"});
+    } else {
+      res.status(200).json();
+    }
   });
 });
 
 router.get('/shareO',function(req, res){
-  var member=req.query.member.filter((item)=>{return item!==''});
-  var member=member.filter(function(elem, pos) {
-      return member.indexOf(elem) == pos;
-  })
-  nodemailer.createTestAccount((err, account) => {
-    // create reusable transporter object using the default SMTP transport
-    let transporter = nodemailer.createTransport({
-      /*host: 'smtp.sendgrid.net',
-      port: 587,
-      auth: {
-          user: 'real.user',
-          user: 'verysecret'
-      }
-      host: 'smtp.ethereal.email',
-      port: 587,
-      auth: {
-          user: 'ethereal.user@ethereal.email',
-          user: 'verysecret'
-      }*/
-      service: 'gmail',
-       auth: {
-              user: 'youremail@address.com@gmail.com',
-              pass: 'yourpassword'
-       }
-    });
-
-    // setup email data with unicode symbols
-    let mailOptions = {
-        from: '"👻" <foo@blurdybloop.com>', // sender address
-        to: member, // list of receivers
-        subject: 'no-reply@dropbox.com ✔', // Subject line
-        text: "'"+req.query.username+"' has shared file '"+req.query.file+"' with you. Please see attachment to view the file.", // plain text body
-        //html: '<b>Hello world?</b>', // html body
-        attachments: [
-            {
-                filename: req.query.file,
-                path: path.join(__dirname,'../../') + `/${req.query.folder} ${req.query.username}/${req.query.file}`,
-                cid: 'nyan@example.com' // should be as unique as possible
-            },
-            /*// String attachment
-            {
-                filename: 'notes.txt',
-                content: 'Some notes about this e-mail',
-                contentType: 'text/plain' // optional, would be detected from the filename
-            },
-
-            // Binary Buffer attachment
-            {
-                filename: 'image.png',
-                content: new Buffer(
-                    'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQAQMAAAAlPW0iAAAABlBMVEUAAAD/' +
-                        '//+l2Z/dAAAAM0lEQVR4nGP4/5/h/1+G/58ZDrAz3D/McH8yw83NDDeNGe4U' +
-                        'g9C9zwz3gVLMDA/A6P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC',
-                    'base64'
-                ),
-
-                cid: 'note@example.com' // should be as unique as possible
-            },
-
-            // File Stream attachment
-            {
-                filename: 'nyan cat ✔.gif',
-                path: __dirname + '/assets/nyan.gif',
-                cid: 'nyan@example.com' // should be as unique as possible
-            }*/
-        ]
-    };
-
-    // send mail with defined transport object
-    transporter.sendMail(mailOptions, (error, info) => {
-        if (error) {
-            return console.log(error);
-            res.status(401).json();
-        }
-        console.log('Message sent: %s', info.messageId);
-        // Preview only available when sending through an Ethereal account
-        console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
-
-        // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@blurdybloop.com>
-        // Preview URL: https://ethereal.email/message/WaQKMgKddxQDoou...
-
-        transporter.close();
-        res.status(200).json();
-    });
+  console.log("req.query.folder part "+req.query.folder);
+  kafka.make_request('shareO_topic',{ username:req.query.username, file:req.query.file, folder:'req.query.folder', member:req.query.member }, function(err,results){
+    console.log('in result');
+    console.log(results);
+    if(err){
+      res.status(401).json({message: "Some Error"});
+    } else {
+      res.status(200).json();
+    }
   });
 });
 
 router.get('/shareG',function(req, res){
-  var member=req.query.member.filter((item)=>{return item!==''});
-  var member=member.filter(function(elem, pos) {
-      return member.indexOf(elem) == pos;
-  })
-  nodemailer.createTestAccount((err, account) => {
-    // create reusable transporter object using the default SMTP transport
-    let transporter = nodemailer.createTransport({
-      /*host: 'smtp.sendgrid.net',
-      port: 587,
-      auth: {
-          user: 'real.user',
-          user: 'verysecret'
-      }
-      host: 'smtp.ethereal.email',
-      port: 587,
-      auth: {
-          user: 'ethereal.user@ethereal.email',
-          user: 'verysecret'
-      }*/
-      service: 'gmail',
-       auth: {
-              user: 'youremail@address.com@gmail.com',
-              pass: 'yourpassword'
-       }
-    });
-
-    // setup email data with unicode symbols
-    let mailOptions = {
-        from: '"👻" <foo@blurdybloop.com>', // sender address
-        to: member, // list of receivers
-        subject: 'no-reply@dropbox.com ✔', // Subject line
-        text: "'"+req.query.username+"' has shared file '"+req.query.file+"' with you. Please see attachment to view the file.", // plain text body
-        //html: '<b>Hello world?</b>', // html body
-        attachments: [
-            {
-                filename: req.query.file,
-                path: path.join(__dirname,'../../') + `/${req.query.folder} ${req.query.creator}/${req.query.file}`,
-                cid: 'nyan@example.com' // should be as unique as possible
-            },
-            /*// String attachment
-            {
-                filename: 'notes.txt',
-                content: 'Some notes about this e-mail',
-                contentType: 'text/plain' // optional, would be detected from the filename
-            },
-
-            // Binary Buffer attachment
-            {
-                filename: 'image.png',
-                content: new Buffer(
-                    'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQAQMAAAAlPW0iAAAABlBMVEUAAAD/' +
-                        '//+l2Z/dAAAAM0lEQVR4nGP4/5/h/1+G/58ZDrAz3D/McH8yw83NDDeNGe4U' +
-                        'g9C9zwz3gVLMDA/A6P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC',
-                    'base64'
-                ),
-
-                cid: 'note@example.com' // should be as unique as possible
-            },
-
-            // File Stream attachment
-            {
-                filename: 'nyan cat ✔.gif',
-                path: __dirname + '/assets/nyan.gif',
-                cid: 'nyan@example.com' // should be as unique as possible
-            }*/
-        ]
-    };
-
-    // send mail with defined transport object
-    transporter.sendMail(mailOptions, (error, info) => {
-        if (error) {
-            return console.log(error);
-            res.status(401).json();
-        }
-        console.log('Message sent: %s', info.messageId);
-        // Preview only available when sending through an Ethereal account
-        console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
-
-        // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@blurdybloop.com>
-        // Preview URL: https://ethereal.email/message/WaQKMgKddxQDoou...
-
-        transporter.close();
-        res.status(200).json();
-    });
+  kafka.make_request('shareG_topic',{ username:req.query.username, creator:req.query.creator, file:req.query.file, folder:req.query.folder, member:req.query.member }, function(err,results){
+    console.log('in result');
+    console.log(results);
+    if(err){
+      res.status(401).json({message: "Some Error"});
+    } else {
+      res.status(200).json();
+    }
   });
 });
 

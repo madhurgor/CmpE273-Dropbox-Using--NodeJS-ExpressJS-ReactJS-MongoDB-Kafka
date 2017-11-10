@@ -1,0 +1,45 @@
+Overview on Data Governance:
+In simple terms, data governance is the way of defining and managing different types of data. More specifically, it is overall management of the availability, usability, integrity and security of data used in an enterprise.
+Data governance enables companies to have consistent and coherent data. By this, company can make management decisions, improve performances, minimize re-work by reducing errors as well as data duplication and many more things
+
+
+
+Why do companies need a data governance solution?
+For saving money and generating revenue:
+To ensure data consistency, reliability, and repeatability:
+For proper analysis and reporting issues:
+For guiding all other analytics activities:
+For improving confidence and providing clarity
+
+
+
+Based on my evaluation, how easy it was to install and use the IBM Information Governance Catalog solution?
+Installation:
+Based on my evaluation, it was easy to install the IBM Information Governance Catalog as the instructions were provided in each step of the installation. I just needed to follow that instructions and I successfully installed the software in one go. 
+The installation took some time as this software requires other 2 software - Docker Quickstart Terminal and Kitematic (Alpha) - to be installed.
+Usage:
+This application provides guiding tour for acquainting me, as the user, with some of its most useful features of the catalog, such as Asset Search and Linear Demonstration. Through this, I, as the end user, can understand not only the useful features but also how to use the application.
+This application is easy to use as it provides good Graphical User Interface. The searching options is quite efficient as I can narrow down search as well as I can save my search preferences. If I hover around the search results, I can visualize the description, its parent category, status and many more things. Moreover, there is also a feature for adding the asset to collection and sending mail for asking any question related to that asset, making the software user friendly.
+It provides structured view of the table data and all its attributes like columns and keys.
+However, installation step is required to be performed every time the user starts the application which is time consuming process.
+There are 2 options to launch the application 1). Launch IGC Guided Experience and 2). Launch IGC Console. The second option launches the application in web page using http protocol (not https protocol) which is not safe.
+
+
+
+Research at least one competitive application and write, how that is different from this solution.
+Alation Data Catalog, Adaptive Metadata Manager, Collibra Data Governance Center, Data3Sixty Data Collaboration Suite, Diaku Axon and SAS Data Governance are the applications that can also be used as data governance tool.
+
+Comparison between IBM Information Governance Catalog and between Alation Data Catalog 
+
+IBM Information Governance Catalog is majorly used in financial areas and Information Builders Omni-Gen offers products for healthcare providers and insurers.
+
+IBM
+
+
+
+
+
+
+•	Comparison between IBM Information Governance Catalog and Information Builders Omni-Gen:
+o	IBM Information Governance Catalog is majorly focused in financial areas and Information Builders Omni-Gen offers products for healthcare providers and insurers.
+o	IBM

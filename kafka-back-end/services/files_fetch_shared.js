@@ -6,12 +6,13 @@ var dt = dateTime.create();
 
 function handle_request(msg, callback){
   var res = {};
-  console.log("In handle request:"+ JSON.stringify(msg));
+  console.log("In handle request of :"+ JSON.stringify(msg));
 
   var files=[];
 
   console.log(msg.folder);
   console.log(msg.username);
+  console.log("I am here!!");
 
   fs.readdirSync(path.join(__dirname,'../../') + `${msg.folder} ${msg.creator}/`).forEach(file => {
    files.push(file);

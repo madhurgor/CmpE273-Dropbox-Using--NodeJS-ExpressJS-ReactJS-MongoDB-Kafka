@@ -20,6 +20,14 @@ var open_ownshared_folder = require('./services/open_ownshared_folder');
 var delete_own = require('./services/delete_own');
 var files_fetch_own = require('./services/files_fetch_own');
 var files_fetch_shared = require('./services/files_fetch_shared');
+var filesO = require('./services/filesO');
+var downloadG = require('./services/downloadG');
+var downloadR = require('./services/downloadR');
+var deleteG = require('./services/deleteG');
+var share = require('./services/share');
+var shareO = require('./services/shareO');
+var shareS = require('./services/shareS');
+var shareG = require('./services/shareG');
 
 //var topic_name = 'login_topic';
 //var consumer = connection.getConsumer(topic_name);
@@ -44,6 +52,14 @@ var open_ownshared_folder1 = connection.getConsumer('open_ownshared_folder_topic
 var delete_own1 = connection.getConsumer('delete_own_topic');
 var files_fetch_own1 = connection.getConsumer('files_fetch_own_topic');
 var files_fetch_shared1 = connection.getConsumer('files_fetch_shared_topic');
+var filesO1 = connection.getConsumer('filesO_topic');
+var downloadG1 = connection.getConsumer('downloadG_topic');
+var downloadR1 = connection.getConsumer('downloadR_topic');
+var deleteG1 = connection.getConsumer('deleteG_topic');
+var share1 = connection.getConsumer('share_topic');
+var shareO1 = connection.getConsumer('shareO_topic');
+var shareS1 = connection.getConsumer('shareS_topic');
+var shareG1 = connection.getConsumer('shareG_topic');
 
 var producer = connection.getProducer();
 
@@ -471,6 +487,182 @@ files_fetch_shared1.on('message', function (message) {
     console.log(JSON.stringify(message.value));
     var data = JSON.parse(message.value);
     files_fetch_shared.handle_request(data.data, function(err,res){
+        console.log('after handle'+res);
+        var payloads = [
+            { topic: data.replyTo,
+                messages:JSON.stringify({
+                    correlationId:data.correlationId,
+                    data : res
+                }),
+                partition : 0
+            }
+        ];
+        producer.send(payloads, function(err, data){
+            console.log(data);
+        });
+        return;
+    });
+});
+
+filesO1.on('message', function (message) {
+    console.log('message received');
+    console.log(JSON.stringify(message.value));
+    var data = JSON.parse(message.value);
+    filesO.handle_request(data.data, function(err,res){
+        console.log('after handle'+res);
+        var payloads = [
+            { topic: data.replyTo,
+                messages:JSON.stringify({
+                    correlationId:data.correlationId,
+                    data : res
+                }),
+                partition : 0
+            }
+        ];
+        producer.send(payloads, function(err, data){
+            console.log(data);
+        });
+        return;
+    });
+});
+
+downloadG1.on('message', function (message) {
+    console.log('message received');
+    console.log(JSON.stringify(message.value));
+    var data = JSON.parse(message.value);
+    downloadG.handle_request(data.data, function(err,res){
+        console.log('after handle'+res);
+        var payloads = [
+            { topic: data.replyTo,
+                messages:JSON.stringify({
+                    correlationId:data.correlationId,
+                    data : res
+                }),
+                partition : 0
+            }
+        ];
+        producer.send(payloads, function(err, data){
+            console.log(data);
+        });
+        return;
+    });
+});
+
+downloadR1.on('message', function (message) {
+    console.log('message received');
+    console.log(JSON.stringify(message.value));
+    var data = JSON.parse(message.value);
+    downloadR.handle_request(data.data, function(err,res){
+        console.log('after handle'+res);
+        var payloads = [
+            { topic: data.replyTo,
+                messages:JSON.stringify({
+                    correlationId:data.correlationId,
+                    data : res
+                }),
+                partition : 0
+            }
+        ];
+        producer.send(payloads, function(err, data){
+            console.log(data);
+        });
+        return;
+    });
+});
+
+deleteG1.on('message', function (message) {
+    console.log('message received');
+    console.log(JSON.stringify(message.value));
+    var data = JSON.parse(message.value);
+    deleteG.handle_request(data.data, function(err,res){
+        console.log('after handle'+res);
+        var payloads = [
+            { topic: data.replyTo,
+                messages:JSON.stringify({
+                    correlationId:data.correlationId,
+                    data : res
+                }),
+                partition : 0
+            }
+        ];
+        producer.send(payloads, function(err, data){
+            console.log(data);
+        });
+        return;
+    });
+});
+
+share1.on('message', function (message) {
+    console.log('message received');
+    console.log(JSON.stringify(message.value));
+    var data = JSON.parse(message.value);
+    share.handle_request(data.data, function(err,res){
+        console.log('after handle'+res);
+        var payloads = [
+            { topic: data.replyTo,
+                messages:JSON.stringify({
+                    correlationId:data.correlationId,
+                    data : res
+                }),
+                partition : 0
+            }
+        ];
+        producer.send(payloads, function(err, data){
+            console.log(data);
+        });
+        return;
+    });
+});
+
+shareS1.on('message', function (message) {
+    console.log('message received');
+    console.log(JSON.stringify(message.value));
+    var data = JSON.parse(message.value);
+    shareS.handle_request(data.data, function(err,res){
+        console.log('after handle'+res);
+        var payloads = [
+            { topic: data.replyTo,
+                messages:JSON.stringify({
+                    correlationId:data.correlationId,
+                    data : res
+                }),
+                partition : 0
+            }
+        ];
+        producer.send(payloads, function(err, data){
+            console.log(data);
+        });
+        return;
+    });
+});
+
+shareO1.on('message', function (message) {
+    console.log('message received');
+    console.log(JSON.stringify(message.value));
+    var data = JSON.parse(message.value);
+    shareO.handle_request(data.data, function(err,res){
+        console.log('after handle'+res);
+        var payloads = [
+            { topic: data.replyTo,
+                messages:JSON.stringify({
+                    correlationId:data.correlationId,
+                    data : res
+                }),
+                partition : 0
+            }
+        ];
+        producer.send(payloads, function(err, data){
+            console.log(data);
+        });
+        return;
+    });
+});
+
+shareG1.on('message', function (message) {
+    console.log('message received');
+    console.log(JSON.stringify(message.value));
+    var data = JSON.parse(message.value);
+    shareG.handle_request(data.data, function(err,res){
         console.log('after handle'+res);
         var payloads = [
             { topic: data.replyTo,

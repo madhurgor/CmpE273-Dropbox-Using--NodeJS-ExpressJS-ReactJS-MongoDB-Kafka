@@ -1,0 +1,28 @@
+shimon shim:::::
+
+
+Rest--> why useful? which is stateless
+
+consistent access
+
+function call and url call--> what is difference
+
+url is capable of something not done by formal function call.(scalable and caching)
+
+rest is scalable as it is stateless.
+
+stateless does not need to save the state.
+
+for monetary tran, we need stateful.
+
+NoSQL and MySQL DB
+
+F5 n/w for load balancing
+
+Memcache(key=URL,value=webpage) used for webpage caching.
+
+static pages cached and dynamic can not be
+
+implement memcache in project MUST
+
+HOMEWORK: how to use memcached bet application server and DB??
