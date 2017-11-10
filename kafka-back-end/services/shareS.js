@@ -29,8 +29,8 @@ function handle_request(msg, callback){
       }*/
       service: 'gmail',
        auth: {
-         user: 'dummyemail14061994@gmail.com',
-         pass: '1234qwerasdfzxcv'
+         user: 'youremail@address.com@gmail.com',
+         pass: 'yourpassword'
        }
     });
 
