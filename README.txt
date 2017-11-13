@@ -1,25 +1,8 @@
-Open two terminals and follow the steps on the terminals to start the servers:
+Start Zookeeper Service.
+Start Kafka Service.
+Start MongoDB Server.
 
-Kafka server
-	1. cd kafka-back-end
-	2. npm install
-	3. npm start
-
-Back-end server
-	1. cd back-end
-	2. npm install
-	3. npm start
-
-Front-end server
-	1. cd front-end
-	2. npm install
-	3. npm start
-
--->upload folder needs to be created in Main Directory if it does not exist, without this folder application will not work..
--->exported database is stored in "exported dropbox_sql" file
-
-
-* topic_names-->
+create following topics.
 login_topic
 response_topic
 signup_topic
@@ -50,3 +33,23 @@ share_topic
 shareO_topic
 shareS_topic
 shareG_topic
+response_topic
+
+Open 3 terminals and follow the steps on the terminals to start the servers:
+
+Kafka-back-end server
+	1. cd kafka-back-end
+	2. npm install
+	3. npm start
+
+Back-end server
+	1. cd back-end
+	2. npm install
+	3. npm start
+
+Front-end server
+	1. cd front-end
+	2. npm install
+	3. npm start
+
+-->upload folder needs to be created in Main Directory if it does not exist, without this folder application will not work..
